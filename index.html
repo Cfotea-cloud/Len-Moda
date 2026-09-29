@@ -1,92 +1,181 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="es">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LEN MODA</title>
-  <link rel="stylesheet" href="styles.css">
+
+  <meta charset="UTF-8" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <meta name="description" content="Catálogo online de LEN MODA. Moda para mujer y hombre, con atención por WhatsApp." />
+
+  <title>LEN MODA | Catálogo online</title>
+
+  <link rel="preconnect" href=https://fonts.googleapis.com>
+
+  <link rel="preconnect" href=https://fonts.gstatic.com crossorigin>
+
+  <link href=https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+
 </head>
+
 <body>
 
-  <!-- Topbar -->
   <header class="topbar">
-    <div class="brand">LEN MODA</div>
-    <nav>
+
+    <a class="brand" href="#inicio" aria-label="LEN MODA, inicio">LEN MODA</a>
+
+    <nav aria-label="Navegación principal">
+
+      <a href="#novedades">Novedades</a>
+
       <a href="#catalogo">Catálogo</a>
-      <a href="#destacados">Destacados</a>
-      <a href="#nuevos">Nuevos</a>
-      <a class="nav-cta" href="https://wa.me/5491150395940" target="_blank">WhatsApp</a>
+
+      <a class="nav-cta" href=https://wa.me/5491150395940 target="_blank" rel="noopener">WhatsApp</a>
+
     </nav>
+
   </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-content">
-      <p class="eyebrow">CATÁLOGO ONLINE</p>
-      <h1>Moda minimalista premium</h1>
-      <p>Inspirado en Zara, Massimo Dutti y Uniqlo. Conectado a WhatsApp, sin carrito ni pagos.</p>
-      <a href="#catalogo" class="button primary">Ver catálogo</a>
-    </div>
-    <div class="hero-art">LEN</div>
-  </section>
+ 
 
-  <!-- Destacados -->
-  <section id="destacados" class="section catalog">
-    <div class="section-heading">
-      <h2>Destacados & Nuevos</h2>
-      <p>Productos seleccionados</p>
-    </div>
-    <div id="featured-grid" class="product-grid"></div>
-  </section>
+  <main>
 
-  <!-- Catálogo -->
-  <section id="catalogo" class="section catalog">
-    <div class="section-heading">
-      <h2>Catálogo completo</h2>
-      <p id="product-count"></p>
-    </div>
+    <section class="hero" id="inicio">
 
-    <div class="controls">
-      <div class="search-box">
-        <input id="search" type="text" placeholder="Buscar productos...">
+      <div class="hero-content">
+
+        <p class="eyebrow">NUEVOS INGRESOS</p>
+
+        <h1>Prendas para todos los días.</h1>
+
+        <p>Moda femenina y masculina seleccionada en Flores. Mirá el catálogo y consultá disponibilidad por WhatsApp.</p>
+
+        <a class="button primary" href="#catalogo">Ver catálogo</a>
+
       </div>
-      <div id="filters" class="filters"></div>
-    </div>
 
-    <div id="catalog-grid" class="product-grid"></div>
-    <p id="status" class="status"></p>
-  </section>
+      <div class="hero-art" aria-hidden="true">
 
-  <!-- Template para productos -->
-  <template id="product-template">
-    <div class="product-card">
-      <div class="image-wrap">
-        <img class="product-image" alt="">
-        <div class="badges"></div>
+        <span>LEN</span><span>MODA</span>
+
       </div>
-      <div class="card-body">
-        <p class="product-category"></p>
-        <h3 class="product-name"></h3>
-        <p class="product-description"></p>
-        <div class="product-meta"></div>
-        <div class="product-thumbs"></div> <!-- miniaturas -->
-        <div class="card-bottom">
-          <span class="product-price"></span>
-          <a class="button whatsapp-link" target="_blank">WhatsApp</a>
-        </div>
+
+    </section>
+
+ 
+
+    <section class="section" id="novedades">
+
+      <div class="section-heading">
+
+        <div><p class="eyebrow">SELECCIÓN LEN</p><h2>Destacados</h2></div>
+
+        <p>Los elegidos de esta semana.</p>
+
       </div>
-    </div>
-  </template>
 
-  <!-- Botón flotante WhatsApp -->
-  <a href="https://wa.me/5491150395940" class="floating-whatsapp" target="_blank">WA</a>
+      <div id="featured-grid" class="product-grid"></div>
 
-  <!-- Footer -->
+    </section>
+
+ 
+
+    <section class="section catalog" id="catalogo">
+
+      <div class="section-heading">
+
+        <div><p class="eyebrow">TODAS LAS PRENDAS</p><h2>Catálogo</h2></div>
+
+        <p id="product-count" aria-live="polite"></p>
+
+      </div>
+
+ 
+
+      <div class="controls">
+
+        <label class="search-box">
+
+          <span class="sr-only">Buscar productos</span>
+
+          <input id="search" type="search" placeholder="Buscar por nombre, categoría o color..." />
+
+        </label>
+
+        <div id="filters" class="filters" aria-label="Filtros del catálogo"></div>
+
+      </div>
+
+ 
+
+      <div id="status" class="status" aria-live="polite">Cargando productos...</div>
+
+      <div id="catalog-grid" class="product-grid"></div>
+
+    </section>
+
+  </main>
+
+ 
+
+  <a class="floating-whatsapp" href=https://wa.me/5491150395940 target="_blank" rel="noopener" aria-label="Consultar por WhatsApp">WA</a>
+
+ 
+
   <footer>
-    <p>© 2026 LEN MODA</p>
-    <p>Catálogo conectado a WhatsApp</p>
+
+    <strong>LEN MODA</strong>
+
+    <p>Catálogo online. La disponibilidad se confirma por WhatsApp.</p>
+
   </footer>
 
+ 
+
+  <template id="product-template">
+
+    <article class="product-card">
+
+      <div class="image-wrap">
+
+        <img class="product-image" alt="" loading="lazy" />
+
+        <div class="badges"></div>
+
+      </div>
+
+      <div class="card-body">
+
+        <p class="product-category"></p>
+
+        <h3 class="product-name"></h3>
+
+        <p class="product-description"></p>
+
+        <div class="product-meta"></div>
+
+        <div class="card-bottom">
+
+          <strong class="product-price"></strong>
+
+          <a class="button dark whatsapp-link" target="_blank" rel="noopener">Consultar</a>
+
+        </div>
+
+      </div>
+
+    </article>
+
+  </template>
+
+ 
+
   <script src="script.js"></script>
+
 </body>
+
 </html>
