@@ -1,4 +1,4 @@
-const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQgmrR8L46VQtyuEsnmPMmzmZxG_9MxwJNIw7Ttq6h0I1z2_kuW_LJ6caaFOEjSe4elKFl6oy0nMQBn/pub?output=csv";
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1ZmqzWKuMgQnqzEG3DTyBjHRePkxTy8mhc_d0_pOuitc/edit?usp=drive_link";
 
 const WHATSAPP_NUMBER = "5491150395940";
 
