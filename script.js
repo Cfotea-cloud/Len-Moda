@@ -79,21 +79,27 @@ function money(value) {
  
 
 function adapt(row) {
+  const fotos = normalize(row["FOTO URL"])
+    .split(",")
+    .map(url => driveImageUrl(url.trim()))
+    .filter(Boolean);
 
   return {
-
-    id: row.ID, name: row.NOMBRE, gender: row.GENERO, category: row.CATEGORIA,
-
-    price: row.PRECIO, description: row.DESCRIPCION, image: driveImageUrl(row["FOTO URL"]),
-
-    featured: isYes(row.DESTACADO), isNew: isYes(row.NUEVO), visible: isYes(row.VISIBLE),
-
-    size: row.TALLE, color: row.COLOR, date: row["FECHA DE CARGA"]
-
+    id: row.ID,
+    name: row.NOMBRE,
+    gender: row.GENERO,
+    category: row.CATEGORIA,
+    price: row.PRECIO,
+    description: row.DESCRIPCION,
+    images: fotos, // ahora es un array
+    featured: isYes(row.DESTACADO),
+    isNew: isYes(row.NUEVO),
+    visible: isYes(row.VISIBLE),
+    size: row.TALLE,
+    color: row.COLOR,
+    date: row["FECHA DE CARGA"]
   };
-
 }
-
  
 
 function whatsappUrl(product) {
@@ -107,43 +113,44 @@ function whatsappUrl(product) {
  
 
 function card(product) {
-
   const node = document.querySelector("#product-template").content.cloneNode(true);
 
   const img = node.querySelector(".product-image");
-
-  img.src = product.image || "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'><rect width='100%' height='100%' fill='#eee8dd'/><text x='50%' y='50%' text-anchor='middle' fill='#746f66' font-family='Arial' font-size='34'>LEN MODA</text></svg>`);
-
+  img.src = product.images[0] || "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'><rect width='100%' height='100%' fill='#eee8dd'/><text x='50%' y='50%' text-anchor='middle' fill='#746f66' font-family='Arial' font-size='34'>LEN MODA</text></svg>`);
   img.alt = product.name;
 
-  img.onerror = () => { img.onerror = null; img.src = "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'><rect width='100%' height='100%' fill='#eee8dd'/><text x='50%' y='50%' text-anchor='middle' fill='#746f66' font-family='Arial' font-size='30'>Imagen no disponible</text></svg>`); };
+  // miniaturas
+  const thumbs = node.querySelector(".product-thumbs");
+  if (thumbs && product.images.length > 1) {
+    product.images.slice(1).forEach(url => {
+      thumbs.insertAdjacentHTML("beforeend", `<img src="${url}" alt="${product.name}" class="thumb">`);
+if (thumbs && product.images.length > 1) {
+  product.images.slice(1).forEach(url => {
+    const thumb = document.createElement("img");
+    thumb.src = url;
+    thumb.alt = product.name;
+    thumb.className = "thumb";
+    thumb.onclick = () => { img.src = url; };
+    thumbs.appendChild(thumb);
+  });
+}
 
   node.querySelector(".product-category").textContent = `${product.gender} · ${product.category}`;
-
   node.querySelector(".product-name").textContent = product.name;
-
   node.querySelector(".product-description").textContent = product.description || "Consultá detalles y disponibilidad.";
-
   node.querySelector(".product-price").textContent = money(product.price);
-
   node.querySelector(".whatsapp-link").href = whatsappUrl(product);
 
   const badges = node.querySelector(".badges");
-
   if (product.isNew) badges.insertAdjacentHTML("beforeend", '<span class="badge">NUEVO</span>');
-
   if (product.featured) badges.insertAdjacentHTML("beforeend", '<span class="badge">DESTACADO</span>');
 
   const meta = node.querySelector(".product-meta");
-
   if (product.size) meta.insertAdjacentHTML("beforeend", `<span class="meta-pill">Talle ${escapeHTML(product.size)}</span>`);
-
   if (product.color) meta.insertAdjacentHTML("beforeend", `<span class="meta-pill">${escapeHTML(product.color)}</span>`);
 
   return node;
-
 }
-
  
 
 function escapeHTML(value) { const div = document.createElement("div"); div.textContent = value; return div.innerHTML; }
