@@ -787,14 +787,13 @@ document.querySelectorAll(".size-option").forEach((btn) => {
 
 const message =
 
-`Hola 👋
+`Hola!
 
 Me interesa el siguiente producto:
 
 Producto: ${selectedProduct.NOMBRE}
-
+Código: ${selectedProduct.ID_PRODUCTO}
 Color: ${selectedVariant.COLOR}
-
 Talle: ${window.selectedSize || "No especificado"}
 
 ¿Sigue disponible?`;
