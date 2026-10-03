@@ -35,7 +35,35 @@
       <span>LEN MODA</span>
 
     </a>
+.header-socials{
 
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    margin-left:20px;
+
+}
+
+.header-socials a{
+
+    text-decoration:none;
+
+    font-size:22px;
+
+    transition:.25s;
+
+}
+
+.header-socials a:hover{
+
+    transform:translateY(-2px);
+
+}
+
+`
 <div class="header-socials">
 
   <a id="headerInstagram"
@@ -80,7 +108,17 @@
 
       <a href="#catalogo">Catálogo</a>
 
-      <a href="#instagram">Instagram</a>
+      <a id="headerInstagram" target="_blank" aria-label="Instagram">
+
+📷
+
+</a>
+
+<a id="headerFacebook" target="_blank" aria-label="Facebook">
+
+👍
+
+</a>
 
       <a id="headerWa" class="nav-cta" target="_blank" rel="noopener">WhatsApp</a>
 
