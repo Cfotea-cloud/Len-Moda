@@ -859,23 +859,24 @@ function setupInstagram() {
  
 
   if ($("#instagramLink")) {
-
     $("#instagramLink").href = url;
+
+if ($("#headerInstagram"))
+
+    $("#headerInstagram").href = url;
+
+if ($("#headerFacebook"))
+
+    $("#headerFacebook").href = getConfig("FACEBOOK_URL");
 
     $("#instagramLink").textContent = `@${handle.replace("@", "")} →`;
 
   }
 
   if ($("#footerInstagram")) $("#footerInstagram").href = url;
-
- 
-
   const grid = $("#instagramGrid");
-
   if (!grid) return;
-
  
-
   const images = products
 
     .filter((product) => yes(product.VISIBLE))
