@@ -860,16 +860,16 @@ function setupInstagram() {
 
   if ($("#instagramLink")) {
     $("#instagramLink").href = url;
+    $("#instagramLink").textContent =
+     `@${handle.replace("@", "")} →`;
+  }
 
 if ($("#headerInstagram"))
-
     $("#headerInstagram").href = url;
 
 if ($("#headerFacebook"))
-
     $("#headerFacebook").href = getConfig("FACEBOOK_URL");
 
-    $("#instagramLink").textContent = `@${handle.replace("@", "")} →`;
 
   }
 
