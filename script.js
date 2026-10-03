@@ -4,7 +4,7 @@ const SHEET_ID = "1ZmqzWKuMgQnqzEG3DTyBjHRePkxTy8mhc_d0_pOuitc";
 
 const csvUrl = (sheet) =>
 
-  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
+`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
 
  
 
