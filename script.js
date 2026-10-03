@@ -708,16 +708,51 @@ function renderVariant() {
 
   $("#detailPrice").textContent = money(selectedVariant.PRECIO);
 
-  $("#sizes").innerHTML = norm(selectedVariant.TALLES)
+const sizes = norm(selectedVariant.TALLES)
 
-    .split("|")
+  .split("|")
 
-    .filter(Boolean)
+  .filter(Boolean);
 
-    .map((size) => `<span class="option">${size.trim()}</span>`)
+window.selectedSize = sizes[0] || null;
 
-    .join("");
+$("#sizes").innerHTML = sizes
 
+  .map(
+
+    (size) =>
+
+      `<button class="option size-option ${
+
+        size === window.selectedSize ? "active" : ""
+
+      }" data-size="${size}">
+
+        ${size.trim()}
+
+      </button>`
+
+  )
+
+  .join("");
+
+document.querySelectorAll(".size-option").forEach((btn) => {
+
+  btn.addEventListener("click", () => {
+
+    document
+
+      .querySelectorAll(".size-option")
+
+      .forEach((b) => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    window.selectedSize = btn.dataset.size;
+
+  });
+
+});
  
 
   const thumbs = $("#thumbs");
