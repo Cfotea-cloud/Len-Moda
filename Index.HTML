@@ -1,0 +1,325 @@
+<!doctype html>
+
+<html lang="es">
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <meta name="description" content="LEN MODA, catálogo online de indumentaria con atención personalizada por WhatsApp.">
+
+  <title>LEN MODA | Tu estilo, tu elegancia</title>
+
+  <link rel="preconnect" href=https://fonts.googleapis.com>
+
+  <link rel="preconnect" href=https://fonts.gstatic.com crossorigin>
+
+  <link href=https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Montserrat:wght@400;500;600;700&display=swap rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+
+</head>
+
+<body>
+
+  <div class="announcement">Nuevos ingresos todas las semanas · Consultas por WhatsApp</div>
+
+  <header class="header" id="inicio">
+
+    <a class="brand" href="#inicio" aria-label="LEN MODA, inicio">
+
+      <img src="logo-len-moda.png" alt="Logo LEN MODA">
+
+      <span>LEN MODA</span>
+
+    </a>
+
+<div class="header-socials">
+
+  <a id="headerInstagram"
+
+     target="_blank"
+
+     aria-label="Instagram">
+
+    📷
+
+  </a>
+
+  <a id="headerFacebook"
+
+     target="_blank"
+
+     aria-label="Facebook">
+
+    👍
+
+  </a>
+
+  <a id="headerWa"
+
+     target="_blank"
+
+     aria-label="WhatsApp">
+
+    💬
+
+  </a>
+
+</div>
+
+    <button id="menuButton" class="menu-button" aria-label="Abrir menú" aria-expanded="false">Menú</button>
+
+    <nav id="mainNav">
+
+      <a href="#favoritos">Favoritos</a>
+
+      <a href="#categorias">Categorías</a>
+
+      <a href="#catalogo">Catálogo</a>
+
+      <a href="#instagram">Instagram</a>
+
+      <a id="headerWa" class="nav-cta" target="_blank" rel="noopener">WhatsApp</a>
+
+    </nav>
+
+  </header>
+
+ 
+
+  <main>
+
+    <section class="hero" id="hero">
+
+      <div class="hero-overlay"></div>
+
+      <div class="hero-content reveal">
+
+        <img class="hero-logo" src="logo-len-moda.webp" alt="LEN MODA">
+
+        <p class="kicker">NUEVA COLECCIÓN</p>
+
+        <h1>Tu estilo.<br>Tu elegancia.</h1>
+
+        <p class="hero-copy">Prendas seleccionadas para acompañarte todos los días.</p>
+
+        <div class="hero-actions">
+
+          <a class="button button-light" href="#catalogo">Ver catálogo</a>
+
+          <a id="heroWa" class="button button-ghost" target="_blank" rel="noopener">Consultar</a>
+
+        </div>
+
+      </div>
+
+      <a href="#favoritos" class="scroll-cue" aria-label="Ir a favoritos">Descubrir ↓</a>
+
+    </section>
+
+ 
+
+    <section class="section reveal" id="favoritos">
+
+      <div class="section-heading">
+
+        <div><p class="kicker">SELECCIÓN LEN</p><h2>Nuestros favoritos</h2></div>
+
+        <div class="carousel-controls">
+
+          <button class="round-button" data-carousel="featured" data-dir="-1" aria-label="Anterior">←</button>
+
+          <button class="round-button" data-carousel="featured" data-dir="1" aria-label="Siguiente">→</button>
+
+        </div>
+
+      </div>
+
+      <div id="featuredCarousel" class="carousel"></div>
+
+    </section>
+
+ 
+
+    <section class="section tinted reveal" id="novedades">
+
+      <div class="section-heading">
+
+        <div><p class="kicker">RECIÉN LLEGADOS</p><h2>Nuevos ingresos</h2></div>
+
+        <div class="carousel-controls">
+
+          <button class="round-button" data-carousel="new" data-dir="-1" aria-label="Anterior">←</button>
+
+          <button class="round-button" data-carousel="new" data-dir="1" aria-label="Siguiente">→</button>
+
+        </div>
+
+      </div>
+
+      <div id="newCarousel" class="carousel"></div>
+
+    </section>
+
+ 
+
+    <section class="section reveal" id="categorias">
+
+      <div class="center-heading"><p class="kicker">ENCONTRÁ TU ESTILO</p><h2>Categorías</h2></div>
+
+      <div id="categoryGrid" class="category-grid"></div>
+
+    </section>
+
+ 
+
+    <section class="section catalog-section" id="catalogo">
+
+      <div class="section-heading reveal">
+
+        <div><p class="kicker">COLECCIÓN COMPLETA</p><h2>Catálogo</h2></div>
+
+        <p id="count" class="count"></p>
+
+      </div>
+
+      <div class="toolbar reveal">
+
+        <label class="search"><span>⌕</span><input id="search" type="search" placeholder="Buscar por prenda, color o categoría"></label>
+
+        <div id="filters" class="filters"></div>
+
+      </div>
+
+      <p id="status" class="status">Cargando catálogo…</p>
+
+      <div id="grid" class="product-grid"></div>
+
+    </section>
+
+ 
+
+    <section class="instagram-section reveal" id="instagram">
+
+      <div class="instagram-copy">
+
+        <p class="kicker">INSPIRACIÓN DIARIA</p>
+
+        <h2>Seguinos en Instagram</h2>
+
+        <p>Descubrí novedades, combinaciones y próximos ingresos.</p>
+
+        <a id="instagramLink" class="text-link" target="_blank" rel="noopener">@lenmoda →</a>
+
+      </div>
+
+      <div id="instagramGrid" class="instagram-grid"></div>
+
+    </section>
+
+  </main>
+
+ 
+
+  <a id="floatingWa" class="floating-wa" target="_blank" rel="noopener" aria-label="Consultar por WhatsApp">WA</a>
+
+ 
+
+  <dialog id="productDialog">
+
+    <button id="closeDialog" class="close" aria-label="Cerrar">×</button>
+
+    <div class="detail">
+
+      <div class="gallery">
+
+        <img id="mainPhoto" class="main-photo" alt="">
+
+        <button id="photoPrev" class="gallery-arrow left" aria-label="Foto anterior">←</button>
+
+        <button id="photoNext" class="gallery-arrow right" aria-label="Foto siguiente">→</button>
+
+        <div id="thumbs" class="thumbs"></div>
+
+      </div>
+
+      <div class="detail-info">
+
+        <p id="detailCategory" class="kicker"></p>
+
+        <h2 id="detailName"></h2>
+
+        <p id="detailDescription" class="detail-description"></p>
+
+        <strong id="detailPrice" class="detail-price"></strong>
+
+        <div class="detail-block"><b>Color</b><div id="colors" class="options"></div></div>
+
+        <div class="detail-block"><b>Talles disponibles</b><div id="sizes" class="options"></div></div>
+
+        <a id="detailWa" class="button button-dark full" target="_blank" rel="noopener">Consultar por WhatsApp</a>
+
+        <p class="microcopy">La disponibilidad final se confirma por WhatsApp.</p>
+
+      </div>
+
+    </div>
+
+  </dialog>
+
+ 
+
+  <footer>
+
+    <div class="footer-brand"><img src="logo-len-moda.png" alt="Logo LEN MODA"><div><b>LEN MODA</b><p>Tu estilo, tu elegancia.</p></div></div>
+
+    <div class="footer-links"><a href="#catalogo">Catálogo</a><a id="footerInstagram" target="_blank" rel="noopener">Instagram</a><a id="footerFacebook" target="_blank" rel="noopener">Facebook</a><a id="footerWa" target="_blank" rel="noopener">WhatsApp</a></div>
+
+    <small>© <span id="year"></span> LEN MODA</small>
+
+  </footer>
+
+ 
+
+  <template id="productTemplate">
+
+    <article class="product-card reveal">
+
+      <button class="product-open" type="button">
+
+        <div class="product-image-wrap">
+
+          <img class="product-image primary-image" alt="" loading="lazy">
+
+          <img class="product-image secondary-image" alt="" loading="lazy">
+
+          <div class="badges"></div>
+
+          <span class="quick-view">Ver detalle</span>
+
+        </div>
+
+      </button>
+
+      <div class="product-body">
+
+        <p class="product-category"></p>
+
+        <h3 class="product-name"></h3>
+
+        <div class="product-row"><strong class="product-price"></strong><div class="swatches"></div></div>
+
+      </div>
+
+    </article>
+
+  </template>
+
+  <script src="script.js"></script>
+
+</body>
+
+</html>
