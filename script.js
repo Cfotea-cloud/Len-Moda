@@ -785,11 +785,19 @@ document.querySelectorAll(".size-option").forEach((btn) => {
 
  
 
-  const message =
+const message =
 
-    `Hola! Vi ${selectedProduct.NOMBRE}, color ${selectedVariant.COLOR} ` +
+`Hola 👋
 
-    `(ID ${selectedProduct.ID_PRODUCTO}) en LEN MODA. ¿Sigue disponible?`;
+Me interesa el siguiente producto:
+
+Producto: ${selectedProduct.NOMBRE}
+
+Color: ${selectedVariant.COLOR}
+
+Talle: ${window.selectedSize || "No especificado"}
+
+¿Sigue disponible?`;
 
   $("#detailWa").href = whatsappUrl(message);
 
