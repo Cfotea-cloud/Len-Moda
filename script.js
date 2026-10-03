@@ -1,65 +1,1125 @@
-const SHEET_ID="1ZmqzWKuMgQnqzEG3DTyBjHRePkxTy8mhc_d0_pOuitc";
+const SHEET_ID = "1ZmqzWKuMgQnqzEG3DTyBjHRePkxTy8mhc_d0_pOuitc";
 
-const csvUrl=sheet=>`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
+ 
 
-const FALLBACK={WHATSAPP:"5491150395940",INSTAGRAM:"lenmoda",INSTAGRAM_URL:"https://www.instagram.com"/,FACEBOOK_URL:"https://www.facebook.com/",HERO_URL:""};
+const csvUrl = (sheet) =>
 
-const FALLBACK_HERO="https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=2200&q=85";
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
 
-let products=[],variants=[],config={},active="TODOS",selectedProduct=null,selectedVariant=null,currentPhoto=0;
+ 
 
-const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)],norm=v=>String(v??"").trim(),key=v=>norm(v).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toUpperCase(),yes=v=>["SI","SÍ","TRUE","1"].includes(key(v));
+const FALLBACK = {
 
-function parseCSV(text){const rows=[];let row=[],cell="",quoted=false;for(let i=0;i<text.length;i++){const ch=text[i],next=text[i+1];if(ch==='"'&&quoted&&next==='"'){cell+='"';i++}else if(ch==='"')quoted=!quoted;else if(ch===','&&!quoted){row.push(cell);cell=""}else if((ch==='\n'||ch==='\r')&&!quoted){if(ch==='\r'&&next==='\n')i++;row.push(cell);if(row.some(v=>v.trim()))rows.push(row);row=[];cell=""}else cell+=ch}if(cell||row.length){row.push(cell);rows.push(row)}if(!rows.length)return[];const headers=rows[0].map(key);return rows.slice(1).map(values=>Object.fromEntries(headers.map((h,i)=>[h,norm(values[i])])))}
+  WHATSAPP: "5491150395940",
 
-async function load(sheet){const response=await fetch(csvUrl(sheet),{cache:"no-store"});if(!response.ok)throw Error(sheet);return parseCSV(await response.text())}
+  INSTAGRAM: "lenmoda",
 
-function image(url){const value=norm(url);const match=value.match(/\/d\/([\w-]+)/)||value.match(/[?&]id=([\w-]+)/);return match?`https://drive.google.com/thumbnail?id=${match[1]}&sz=w1600`:value}
+  INSTAGRAM_URL: "https://www.instagram.com/",
 
-function variantPhotos(v){return norm(v?.FOTOS_URL).split("|").map(image).filter(Boolean)}
+  FACEBOOK_URL: "https://www.facebook.com/",
 
-function money(v){const n=Number(String(v).replace(/[^0-9,.-]/g,"").replace(",","."));return Number.isFinite(n)?new Intl.NumberFormat("es-AR",{style:"currency",currency:"ARS",maximumFractionDigits:0}).format(n):v}
+  HERO_URL: ""
 
-function getConfig(name){return config[key(name)]||FALLBACK[key(name)]||""}
+};
 
-function productVariants(id){return variants.filter(v=>v.ID_PRODUCTO===id&&yes(v.VISIBLE)&&(v.STOCK===""||Number(v.STOCK)>0))}
+ 
 
-function mainPhotos(p){const v=productVariants(p.ID_PRODUCTO)[0];return variantPhotos(v)}
+let products = [];
 
-function safeImage(url){return url||"data:image/svg+xml;charset=UTF-8,"+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='1000'><rect width='100%' height='100%' fill='#f7f3ed'/><text x='50%' y='50%' text-anchor='middle' fill='#706a64' font-family='Arial' font-size='32'>LEN MODA</text></svg>`)}
+let variants = [];
 
-function waUrl(message="Hola! Quisiera consultar por los productos de LEN MODA."){return `https://wa.me/${getConfig("WHATSAPP")}?text=${encodeURIComponent(message)}`}
+let config = {};
 
-function createCard(p){const vs=productVariants(p.ID_PRODUCTO),photos=mainPhotos(p),node=$("#productTemplate").content.cloneNode(true),article=node.querySelector(".product-card"),open=node.querySelector(".product-open"),primary=node.querySelector(".primary-image"),secondary=node.querySelector(".secondary-image");primary.src=safeImage(photos[0]);secondary.src=safeImage(photos[1]||photos[0]);primary.alt=p.NOMBRE;secondary.alt=`Otra vista de ${p.NOMBRE}`;node.querySelector(".product-category").textContent=`${p.GENERO} · ${p.CATEGORIA}`;node.querySelector(".product-name").textContent=p.NOMBRE;const prices=vs.map(v=>Number(String(v.PRECIO).replace(/[^0-9.-]/g,""))).filter(Number.isFinite);node.querySelector(".product-price").textContent=prices.length?`Desde ${money(Math.min(...prices))}`:"Consultar";const badges=node.querySelector(".badges");if(yes(p.NUEVO))badges.insertAdjacentHTML("beforeend",'<span class="badge">NUEVO</span>');if(yes(p.DESTACADO))badges.insertAdjacentHTML("beforeend",'<span class="badge">FAVORITO</span>');const swatches=node.querySelector(".swatches");vs.slice(0,6).forEach(v=>{const s=document.createElement("span");s.className="swatch";s.title=v.COLOR;s.style.background=v.HEX_COLOR||"#ddd";swatches.append(s)});open.onclick=()=>openProduct(p);setTimeout(()=>observeReveal(article),0);return node}
+let active = "TODOS";
 
-function renderInto(container,list){container.innerHTML="";list.forEach(p=>container.append(createCard(p)))}
+let selectedProduct = null;
 
-function filteredProducts(){const q=key($("#search").value);return products.filter(p=>yes(p.VISIBLE)&&productVariants(p.ID_PRODUCTO).length).filter(p=>(active==="TODOS"||key(p.GENERO)===active||key(p.CATEGORIA)===active)&&(!q||key(`${p.NOMBRE} ${p.GENERO} ${p.CATEGORIA} ${p.DESCRIPCION} ${productVariants(p.ID_PRODUCTO).map(v=>v.COLOR).join(" ")}`).includes(q)))}
+let selectedVariant = null;
 
-function renderCatalog(){const list=filteredProducts();$("#count").textContent=`${list.length} producto${list.length===1?"":"s"}`;renderInto($("#grid"),list);$("#status").textContent=list.length?"":"No encontramos productos con esos filtros."}
+let currentPhoto = 0;
 
-function setupFilters(){const values=["TODOS","MUJER","HOMBRE",...products.map(p=>key(p.CATEGORIA))];$("#filters").innerHTML="";[...new Set(values.filter(Boolean))].forEach(value=>{const b=document.createElement("button");b.className=`filter ${value===active?"active":""}`;b.textContent=title(value);b.onclick=()=>{active=value;setupFilters();renderCatalog();document.querySelector("#catalogo").scrollIntoView()};$("#filters").append(b)})}
+ 
 
-function title(v){return norm(v).toLowerCase().replace(/(^|\s)\S/g,x=>x.toUpperCase())}
+const $ = (selector) => document.querySelector(selector);
 
-function iconSVG(category){const k=key(category);if(k.includes("PANT")||k.includes("JEAN"))return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 5h16l3 38H25l-1-23-1 23H13z"/><path d="M17 12h14"/></svg>';if(k.includes("ACCES"))return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 18h28l-2 24H12z"/><path d="M17 18c0-10 14-10 14 0"/></svg>';if(k.includes("CALZ")||k.includes("ZAP"))return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 31c9 0 13-6 15-16l7 5c1 7 6 9 12 11v7H8z"/></svg>';if(k.includes("CAMP")||k.includes("BUZO")||k.includes("SWEAT"))return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 7l7 4 7-4 10 10-6 7v18H13V24l-6-7z"/><path d="M24 11v31"/></svg>';return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 7l7 4 7-4 10 10-6 7v18H13V24l-6-7z"/></svg>'}
+const $$ = (selector) => [...document.querySelectorAll(selector)];
 
-function setupCategories(){const cats=[...new Set(products.filter(p=>yes(p.VISIBLE)).map(p=>key(p.CATEGORIA)).filter(Boolean))].slice(0,5);const grid=$("#categoryGrid");grid.innerHTML="";cats.forEach(cat=>{const n=products.filter(p=>key(p.CATEGORIA)===cat&&yes(p.VISIBLE)).length,b=document.createElement("button");b.className="category-card";b.innerHTML=`<div class="category-icon">${iconSVG(cat)}</div><b>${title(cat)}</b><small>${n} producto${n===1?"":"s"}</small>`;b.onclick=()=>{active=cat;setupFilters();renderCatalog();$("#catalogo").scrollIntoView()};grid.append(b)})}
+const norm = (value) => String(value ?? "").trim();
 
-function openProduct(p,variantId){selectedProduct=p;const vs=productVariants(p.ID_PRODUCTO);selectedVariant=vs.find(v=>v.ID_VARIANTE===variantId)||vs[0];currentPhoto=0;$("#detailCategory").textContent=`${p.GENERO} · ${p.CATEGORIA}`;$("#detailName").textContent=p.NOMBRE;$("#detailDescription").textContent=p.DESCRIPCION||"Consultá detalles y disponibilidad.";renderVariant();$("#colors").innerHTML="";vs.forEach(v=>{const b=document.createElement("button");b.className=`option ${v.ID_VARIANTE===selectedVariant.ID_VARIANTE?"active":""}`;b.textContent=v.COLOR;b.onclick=()=>openProduct(p,v.ID_VARIANTE);$("#colors").append(b)});if(!$("#productDialog").open)$("#productDialog").showModal();document.body.classList.add("modal-open")}
+ 
 
-function renderVariant(){const photos=variantPhotos(selectedVariant);setPhoto(0,photos);$("#detailPrice").textContent=money(selectedVariant.PRECIO);$("#sizes").innerHTML=norm(selectedVariant.TALLES).split("|").filter(Boolean).map(x=>`<span class="option">${x.trim()}</span>`).join("");$("#thumbs").innerHTML="";photos.forEach((url,i)=>{const im=document.createElement("img");im.src=safeImage(url);im.alt=`${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${i+1}`;im.className=i===0?"active":"";im.onclick=()=>setPhoto(i,photos);$("#thumbs").append(im)});const msg=`Hola! Vi ${selectedProduct.NOMBRE}, color ${selectedVariant.COLOR} (ID ${selectedProduct.ID_PRODUCTO}) en LEN MODA. ¿Sigue disponible?`;$("#detailWa").href=waUrl(msg)}
+const key = (value) =>
 
-function setPhoto(index,photos=variantPhotos(selectedVariant)){if(!photos.length){$("#mainPhoto").src=safeImage("");return}currentPhoto=(index+photos.length)%photos.length;$("#mainPhoto").src=safeImage(photos[currentPhoto]);$("#mainPhoto").alt=`${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${currentPhoto+1}`;$$('#thumbs img').forEach((im,i)=>im.classList.toggle('active',i===currentPhoto))}
+  norm(value)
 
-function setupInstagram(){const url=getConfig("INSTAGRAM_URL")||`https://www.instagram.com/${getConfig("INSTAGRAM")}/`;const handle=getConfig("INSTAGRAM")||"lenmoda";$("#instagramLink").href=url;$("#instagramLink").textContent=`@${handle.replace('@','')} →`;$("#footerInstagram").href=url;const images=products.filter(p=>yes(p.VISIBLE)).flatMap(mainPhotos).slice(0,6),grid=$("#instagramGrid");grid.innerHTML="";images.forEach((src,i)=>{const a=document.createElement("a");a.href=url;a.target="_blank";a.rel="noopener";a.setAttribute("aria-label","Ver LEN MODA en Instagram");a.innerHTML=`<img src="${safeImage(src)}" alt="Inspiración LEN MODA ${i+1}" loading="lazy">`;grid.append(a)})}
+    .normalize("NFD")
 
-function setupConfig(){const wa=waUrl();["#headerWa","#heroWa","#floatingWa","#footerWa"].forEach(s=>$(s).href=wa);$("#footerFacebook").href=getConfig("FACEBOOK_URL")||"#";const hero=getConfig("HERO_URL");if(hero)$("#hero").style.backgroundImage=`url("${image(hero)}")`;setupInstagram()}
+    .replace(/[\u0300-\u036f]/g, "")
 
-function observeReveal(el){if(!el)return;revealObserver.observe(el)}
+    .toUpperCase();
 
-const revealObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add("visible");revealObserver.unobserve(e.target)}}),{threshold:.08});
+ 
 
-async function init(){try{const [p,v,c]=await Promise.all([load("PRODUCTOS"),load("VARIANTES"),load("CONFIGURACION")]);products=p;variants=v;config=Object.fromEntries(c.map(x=>[key(x.CAMPO),x.VALOR]));setupConfig();renderInto($("#featuredCarousel"),products.filter(p=>yes(p.VISIBLE)&&yes(p.DESTACADO)&&productVariants(p.ID_PRODUCTO).length));renderInto($("#newCarousel"),products.filter(p=>yes(p.VISIBLE)&&yes(p.NUEVO)&&productVariants(p.ID_PRODUCTO).length));setupCategories();setupFilters();renderCatalog();$$('.reveal').forEach(observeReveal)}catch(error){console.error(error);$("#status").textContent="No se pudo cargar el catálogo. Verificá los nombres de las hojas, los permisos y las URLs."}}
+const yes = (value) => ["SI", "SÍ", "TRUE", "1"].includes(key(value));
 
-$("#search").addEventListener("input",renderCatalog);$("#menuButton").onclick=()=>{const nav=$("#mainNav"),open=nav.classList.toggle("open");$("#menuButton").setAttribute("aria-expanded",open)};$("#mainNav").addEventListener("click",()=>$("#mainNav").classList.remove("open"));$$('[data-carousel]').forEach(b=>b.onclick=()=>{const target=b.dataset.carousel==='featured'?$("#featuredCarousel"):$("#newCarousel");target.scrollBy({left:Number(b.dataset.dir)*Math.min(target.clientWidth*.85,900),behavior:"smooth"})});$("#photoPrev").onclick=()=>setPhoto(currentPhoto-1);$("#photoNext").onclick=()=>setPhoto(currentPhoto+1);$("#closeDialog").onclick=()=>{$("#productDialog").close();document.body.classList.remove("modal-open")};$("#productDialog").addEventListener("close",()=>document.body.classList.remove("modal-open"));$("#productDialog").addEventListener("click",e=>{if(e.target===$("#productDialog"))$("#productDialog").close()});$("#year").textContent=new Date().getFullYear();init();
+ 
+
+function parseCSV(text) {
+
+  const rows = [];
+
+  let row = [];
+
+  let cell = "";
+
+  let quoted = false;
+
+ 
+
+  for (let i = 0; i < text.length; i += 1) {
+
+    const char = text[i];
+
+    const next = text[i + 1];
+
+ 
+
+    if (char === '"' && quoted && next === '"') {
+
+      cell += '"';
+
+      i += 1;
+
+    } else if (char === '"') {
+
+      quoted = !quoted;
+
+    } else if (char === "," && !quoted) {
+
+      row.push(cell);
+
+      cell = "";
+
+    } else if ((char === "\n" || char === "\r") && !quoted) {
+
+      if (char === "\r" && next === "\n") i += 1;
+
+      row.push(cell);
+
+      if (row.some((value) => value.trim() !== "")) rows.push(row);
+
+      row = [];
+
+      cell = "";
+
+    } else {
+
+      cell += char;
+
+    }
+
+  }
+
+ 
+
+  if (cell !== "" || row.length) {
+
+    row.push(cell);
+
+    rows.push(row);
+
+  }
+
+ 
+
+  if (!rows.length) return [];
+
+ 
+
+  const headers = rows[0].map(key);
+
+  return rows.slice(1).map((values) =>
+
+    Object.fromEntries(headers.map((header, index) => [header, norm(values[index])]))
+
+  );
+
+}
+
+ 
+
+async function loadSheet(sheet) {
+
+  const response = await fetch(csvUrl(sheet), { cache: "no-store" });
+
+  if (!response.ok) throw new Error(`No se pudo cargar la hoja ${sheet}: ${response.status}`);
+
+  return parseCSV(await response.text());
+
+}
+
+ 
+
+function driveFileId(url) {
+
+  const value = norm(url);
+
+  const fromPath = value.match(/\/file\/d\/([A-Za-z0-9_-]+)/);
+
+  const fromId = value.match(/[?&]id=([A-Za-z0-9_-]+)/);
+
+  return fromPath?.[1] || fromId?.[1] || "";
+
+}
+
+ 
+
+function imageUrl(url) {
+
+  const value = norm(url);
+
+  if (!value) return "";
+
+  const id = driveFileId(value);
+
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : value;
+
+}
+
+ 
+
+function variantPhotos(variant) {
+
+  return norm(variant?.FOTOS_URL)
+
+    .split("|")
+
+    .map((url) => imageUrl(url))
+
+    .filter(Boolean);
+
+}
+
+ 
+
+function placeholderImage() {
+
+  const svg = `
+
+    <svg xmlns=http://www.w3.org/2000/svg width="800" height="1000">
+
+      <rect width="100%" height="100%" fill="#f7f3ed"/>
+
+      <text x="50%" y="50%" text-anchor="middle" fill="#706a64"
+
+        font-family="Arial" font-size="32">LEN MODA</text>
+
+    </svg>`;
+
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
+
+}
+
+ 
+
+function safeImage(url) {
+
+  return url || placeholderImage();
+
+}
+
+ 
+
+function money(value) {
+
+  const number = Number(String(value).replace(/[^0-9,.-]/g, "").replace(",", "."));
+
+  return Number.isFinite(number)
+
+    ? new Intl.NumberFormat("es-AR", {
+
+        style: "currency",
+
+        currency: "ARS",
+
+        maximumFractionDigits: 0
+
+      }).format(number)
+
+    : norm(value);
+
+}
+
+ 
+
+function getConfig(name) {
+
+  return config[key(name)] || FALLBACK[key(name)] || "";
+
+}
+
+ 
+
+function productVariants(productId) {
+
+  return variants.filter(
+
+    (variant) =>
+
+      norm(variant.ID_PRODUCTO) === norm(productId) &&
+
+      yes(variant.VISIBLE) &&
+
+      (norm(variant.STOCK) === "" || Number(variant.STOCK) > 0)
+
+  );
+
+}
+
+ 
+
+function mainPhotos(product) {
+
+  return variantPhotos(productVariants(product.ID_PRODUCTO)[0]);
+
+}
+
+ 
+
+function whatsappUrl(message = "Hola! Quisiera consultar por los productos de LEN MODA.") {
+
+  return `https://wa.me/${getConfig("WHATSAPP")}?text=${encodeURIComponent(message)}`;
+
+}
+
+ 
+
+function createCard(product) {
+
+  const availableVariants = productVariants(product.ID_PRODUCTO);
+
+  const photos = mainPhotos(product);
+
+  const node = $("#productTemplate").content.cloneNode(true);
+
+  const article = node.querySelector(".product-card");
+
+  const openButton = node.querySelector(".product-open");
+
+  const primaryImage = node.querySelector(".primary-image");
+
+  const secondaryImage = node.querySelector(".secondary-image");
+
+ 
+
+  primaryImage.src = safeImage(photos[0]);
+
+  secondaryImage.src = safeImage(photos[1] || photos[0]);
+
+  primaryImage.alt = product.NOMBRE;
+
+  secondaryImage.alt = `Otra vista de ${product.NOMBRE}`;
+
+ 
+
+  primaryImage.onerror = () => {
+
+    primaryImage.onerror = null;
+
+    primaryImage.src = placeholderImage();
+
+  };
+
+  secondaryImage.onerror = () => {
+
+    secondaryImage.onerror = null;
+
+    secondaryImage.src = primaryImage.src;
+
+  };
+
+ 
+
+  node.querySelector(".product-category").textContent =
+
+    `${product.GENERO} · ${product.CATEGORIA}`;
+
+  node.querySelector(".product-name").textContent = product.NOMBRE;
+
+ 
+
+  const prices = availableVariants
+
+    .map((variant) => Number(String(variant.PRECIO).replace(/[^0-9.-]/g, "")))
+
+    .filter(Number.isFinite);
+
+ 
+
+  node.querySelector(".product-price").textContent = prices.length
+
+    ? `Desde ${money(Math.min(...prices))}`
+
+    : "Consultar";
+
+ 
+
+  const badges = node.querySelector(".badges");
+
+  if (yes(product.NUEVO)) {
+
+    badges.insertAdjacentHTML("beforeend", '<span class="badge">NUEVO</span>');
+
+  }
+
+  if (yes(product.DESTACADO)) {
+
+    badges.insertAdjacentHTML("beforeend", '<span class="badge">FAVORITO</span>');
+
+  }
+
+ 
+
+  const swatches = node.querySelector(".swatches");
+
+  availableVariants.slice(0, 6).forEach((variant) => {
+
+    const swatch = document.createElement("span");
+
+    swatch.className = "swatch";
+
+    swatch.title = variant.COLOR;
+
+    swatch.style.background = variant.HEX_COLOR || "#ddd";
+
+    swatches.append(swatch);
+
+  });
+
+ 
+
+  openButton.onclick = () => openProduct(product);
+
+  setTimeout(() => observeReveal(article), 0);
+
+  return node;
+
+}
+
+ 
+
+function renderInto(container, list) {
+
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  list.forEach((product) => container.append(createCard(product)));
+
+}
+
+ 
+
+function filteredProducts() {
+
+  const searchInput = $("#search");
+
+  const query = key(searchInput?.value || "");
+
+ 
+
+  return products
+
+    .filter((product) => yes(product.VISIBLE) && productVariants(product.ID_PRODUCTO).length)
+
+    .filter((product) => {
+
+      const matchesFilter =
+
+        active === "TODOS" ||
+
+        key(product.GENERO) === active ||
+
+        key(product.CATEGORIA) === active;
+
+ 
+
+      const searchable = key(
+
+        `${product.NOMBRE} ${product.GENERO} ${product.CATEGORIA} ${product.DESCRIPCION} ` +
+
+        productVariants(product.ID_PRODUCTO).map((variant) => variant.COLOR).join(" ")
+
+      );
+
+ 
+
+      return matchesFilter && (!query || searchable.includes(query));
+
+    });
+
+}
+
+ 
+
+function renderCatalog() {
+
+  const list = filteredProducts();
+
+  if ($("#count")) {
+
+    $("#count").textContent = `${list.length} producto${list.length === 1 ? "" : "s"}`;
+
+  }
+
+  renderInto($("#grid"), list);
+
+  if ($("#status")) {
+
+    $("#status").textContent = list.length
+
+      ? ""
+
+      : "No encontramos productos con esos filtros.";
+
+  }
+
+}
+
+ 
+
+function title(value) {
+
+  return norm(value)
+
+    .toLowerCase()
+
+    .replace(/(^|\s)\S/g, (letter) => letter.toUpperCase());
+
+}
+
+ 
+
+function setupFilters() {
+
+  const container = $("#filters");
+
+  if (!container) return;
+
+ 
+
+  const values = ["TODOS", "MUJER", "HOMBRE", ...products.map((p) => key(p.CATEGORIA))];
+
+  container.innerHTML = "";
+
+ 
+
+  [...new Set(values.filter(Boolean))].forEach((value) => {
+
+    const button = document.createElement("button");
+
+    button.className = `filter ${value === active ? "active" : ""}`;
+
+    button.textContent = title(value);
+
+    button.onclick = () => {
+
+      active = value;
+
+      setupFilters();
+
+      renderCatalog();
+
+      $("#catalogo")?.scrollIntoView({ behavior: "smooth" });
+
+    };
+
+    container.append(button);
+
+  });
+
+}
+
+ 
+
+function iconSVG(category) {
+
+  const categoryKey = key(category);
+
+ 
+
+  if (categoryKey.includes("PANT") || categoryKey.includes("JEAN")) {
+
+    return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 5h16l3 38H25l-1-23-1 23H13z"/><path d="M17 12h14"/></svg>';
+
+  }
+
+  if (categoryKey.includes("ACCES")) {
+
+    return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 18h28l-2 24H12z"/><path d="M17 18c0-10 14-10 14 0"/></svg>';
+
+  }
+
+  if (categoryKey.includes("CALZ") || categoryKey.includes("ZAP")) {
+
+    return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 31c9 0 13-6 15-16l7 5c1 7 6 9 12 11v7H8z"/></svg>';
+
+  }
+
+  return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 7l7 4 7-4 10 10-6 7v18H13V24l-6-7z"/></svg>';
+
+}
+
+ 
+
+function setupCategories() {
+
+  const grid = $("#categoryGrid");
+
+  if (!grid) return;
+
+ 
+
+  const categories = [...new Set(
+
+    products.filter((p) => yes(p.VISIBLE)).map((p) => key(p.CATEGORIA)).filter(Boolean)
+
+  )].slice(0, 5);
+
+ 
+
+  grid.innerHTML = "";
+
+  categories.forEach((category) => {
+
+    const count = products.filter(
+
+      (product) => key(product.CATEGORIA) === category && yes(product.VISIBLE)
+
+    ).length;
+
+ 
+
+    const button = document.createElement("button");
+
+    button.className = "category-card";
+
+    button.innerHTML = `
+
+      <div class="category-icon">${iconSVG(category)}</div>
+
+      <b>${title(category)}</b>
+
+      <small>${count} producto${count === 1 ? "" : "s"}</small>`;
+
+    button.onclick = () => {
+
+      active = category;
+
+      setupFilters();
+
+      renderCatalog();
+
+      $("#catalogo")?.scrollIntoView({ behavior: "smooth" });
+
+    };
+
+    grid.append(button);
+
+  });
+
+}
+
+ 
+
+function openProduct(product, variantId) {
+
+  selectedProduct = product;
+
+  const availableVariants = productVariants(product.ID_PRODUCTO);
+
+  selectedVariant =
+
+    availableVariants.find((variant) => variant.ID_VARIANTE === variantId) ||
+
+    availableVariants[0];
+
+ 
+
+  if (!selectedVariant) return;
+
+ 
+
+  currentPhoto = 0;
+
+  $("#detailCategory").textContent = `${product.GENERO} · ${product.CATEGORIA}`;
+
+  $("#detailName").textContent = product.NOMBRE;
+
+  $("#detailDescription").textContent =
+
+    product.DESCRIPCION || "Consultá detalles y disponibilidad.";
+
+ 
+
+  renderVariant();
+
+ 
+
+  const colors = $("#colors");
+
+  colors.innerHTML = "";
+
+  availableVariants.forEach((variant) => {
+
+    const button = document.createElement("button");
+
+    button.className =
+
+      `option ${variant.ID_VARIANTE === selectedVariant.ID_VARIANTE ? "active" : ""}`;
+
+    button.textContent = variant.COLOR;
+
+    button.onclick = () => openProduct(product, variant.ID_VARIANTE);
+
+    colors.append(button);
+
+  });
+
+ 
+
+  const dialog = $("#productDialog");
+
+  if (!dialog.open) dialog.showModal();
+
+  document.body.classList.add("modal-open");
+
+}
+
+ 
+
+function renderVariant() {
+
+  const photos = variantPhotos(selectedVariant);
+
+  setPhoto(0, photos);
+
+ 
+
+  $("#detailPrice").textContent = money(selectedVariant.PRECIO);
+
+  $("#sizes").innerHTML = norm(selectedVariant.TALLES)
+
+    .split("|")
+
+    .filter(Boolean)
+
+    .map((size) => `<span class="option">${size.trim()}</span>`)
+
+    .join("");
+
+ 
+
+  const thumbs = $("#thumbs");
+
+  thumbs.innerHTML = "";
+
+  photos.forEach((url, index) => {
+
+    const img = document.createElement("img");
+
+    img.src = safeImage(url);
+
+    img.alt = `${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${index + 1}`;
+
+    img.className = index === 0 ? "active" : "";
+
+    img.onclick = () => setPhoto(index, photos);
+
+    img.onerror = () => {
+
+      img.onerror = null;
+
+      img.src = placeholderImage();
+
+    };
+
+    thumbs.append(img);
+
+  });
+
+ 
+
+  const message =
+
+    `Hola! Vi ${selectedProduct.NOMBRE}, color ${selectedVariant.COLOR} ` +
+
+    `(ID ${selectedProduct.ID_PRODUCTO}) en LEN MODA. ¿Sigue disponible?`;
+
+  $("#detailWa").href = whatsappUrl(message);
+
+}
+
+ 
+
+function setPhoto(index, photos = variantPhotos(selectedVariant)) {
+
+  const mainPhoto = $("#mainPhoto");
+
+  if (!photos.length) {
+
+    mainPhoto.src = placeholderImage();
+
+    return;
+
+  }
+
+ 
+
+  currentPhoto = (index + photos.length) % photos.length;
+
+  mainPhoto.src = safeImage(photos[currentPhoto]);
+
+  mainPhoto.alt =
+
+    `${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${currentPhoto + 1}`;
+
+  mainPhoto.onerror = () => {
+
+    mainPhoto.onerror = null;
+
+    mainPhoto.src = placeholderImage();
+
+  };
+
+ 
+
+  $$("#thumbs img").forEach((img, imgIndex) => {
+
+    img.classList.toggle("active", imgIndex === currentPhoto);
+
+  });
+
+}
+
+ 
+
+function setupInstagram() {
+
+  const handle = getConfig("INSTAGRAM") || "lenmoda";
+
+  const url =
+
+    getConfig("INSTAGRAM_URL") ||
+
+    `https://www.instagram.com/${handle.replace("@", "")}/`;
+
+ 
+
+  if ($("#instagramLink")) {
+
+    $("#instagramLink").href = url;
+
+    $("#instagramLink").textContent = `@${handle.replace("@", "")} →`;
+
+  }
+
+  if ($("#footerInstagram")) $("#footerInstagram").href = url;
+
+ 
+
+  const grid = $("#instagramGrid");
+
+  if (!grid) return;
+
+ 
+
+  const images = products
+
+    .filter((product) => yes(product.VISIBLE))
+
+    .flatMap(mainPhotos)
+
+    .slice(0, 6);
+
+ 
+
+  grid.innerHTML = "";
+
+  images.forEach((src, index) => {
+
+    const link = document.createElement("a");
+
+    link.href = url;
+
+    link.target = "_blank";
+
+    link.rel = "noopener";
+
+    link.setAttribute("aria-label", "Ver LEN MODA en Instagram");
+
+    link.innerHTML =
+
+      `<img src="${safeImage(src)}" alt="Inspiración LEN MODA ${index + 1}" loading="lazy">`;
+
+    grid.append(link);
+
+  });
+
+}
+
+ 
+
+function setupConfig() {
+
+  const wa = whatsappUrl();
+
+  ["#headerWa", "#heroWa", "#floatingWa", "#footerWa"].forEach((selector) => {
+
+    const element = $(selector);
+
+    if (element) element.href = wa;
+
+  });
+
+ 
+
+  if ($("#footerFacebook")) {
+
+    $("#footerFacebook").href = getConfig("FACEBOOK_URL") || "#";
+
+  }
+
+ 
+
+  const hero = getConfig("HERO_URL");
+
+  if (hero && $("#hero")) {
+
+    $("#hero").style.backgroundImage = `url("${imageUrl(hero)}")`;
+
+  }
+
+ 
+
+  setupInstagram();
+
+}
+
+ 
+
+const revealObserver = new IntersectionObserver(
+
+  (entries) => {
+
+    entries.forEach((entry) => {
+
+      if (entry.isIntersecting) {
+
+        entry.target.classList.add("visible");
+
+        revealObserver.unobserve(entry.target);
+
+      }
+
+    });
+
+  },
+
+  { threshold: 0.08 }
+
+);
+
+ 
+
+function observeReveal(element) {
+
+  if (element) revealObserver.observe(element);
+
+}
+
+ 
+
+async function init() {
+
+  try {
+
+    const [productRows, variantRows, configRows] = await Promise.all([
+
+      loadSheet("PRODUCTOS"),
+
+      loadSheet("VARIANTES"),
+
+      loadSheet("CONFIGURACION")
+
+    ]);
+
+ 
+
+    products = productRows;
+
+    variants = variantRows;
+
+    config = Object.fromEntries(
+
+      configRows.map((row) => [key(row.CAMPO), norm(row.VALOR)])
+
+    );
+
+ 
+
+    setupConfig();
+
+ 
+
+    renderInto(
+
+      $("#featuredCarousel"),
+
+      products.filter(
+
+        (product) =>
+
+          yes(product.VISIBLE) &&
+
+          yes(product.DESTACADO) &&
+
+          productVariants(product.ID_PRODUCTO).length
+
+      )
+
+    );
+
+ 
+
+    renderInto(
+
+      $("#newCarousel"),
+
+      products.filter(
+
+        (product) =>
+
+          yes(product.VISIBLE) &&
+
+          yes(product.NUEVO) &&
+
+          productVariants(product.ID_PRODUCTO).length
+
+      )
+
+    );
+
+ 
+
+    setupCategories();
+
+    setupFilters();
+
+    renderCatalog();
+
+    $$(".reveal").forEach(observeReveal);
+
+  } catch (error) {
+
+    console.error("Error al iniciar LEN MODA:", error);
+
+    if ($("#status")) {
+
+      $("#status").textContent =
+
+        "No se pudo cargar el catálogo. Revisá la publicación y los nombres de las hojas.";
+
+    }
+
+  }
+
+}
+
+ 
+
+$("#search")?.addEventListener("input", renderCatalog);
+
+ 
+
+$("#menuButton")?.addEventListener("click", () => {
+
+  const nav = $("#mainNav");
+
+  const open = nav.classList.toggle("open");
+
+  $("#menuButton").setAttribute("aria-expanded", open);
+
+});
+
+ 
+
+$("#mainNav")?.addEventListener("click", () => {
+
+  $("#mainNav").classList.remove("open");
+
+});
+
+ 
+
+$$('[data-carousel]').forEach((button) => {
+
+  button.onclick = () => {
+
+    const target =
+
+      button.dataset.carousel === "featured"
+
+        ? $("#featuredCarousel")
+
+        : $("#newCarousel");
+
+    target?.scrollBy({
+
+      left: Number(button.dataset.dir) * Math.min(target.clientWidth * 0.85, 900),
+
+      behavior: "smooth"
+
+    });
+
+  };
+
+});
+
+ 
+
+$("#photoPrev")?.addEventListener("click", () => setPhoto(currentPhoto - 1));
+
+$("#photoNext")?.addEventListener("click", () => setPhoto(currentPhoto + 1));
+
+ 
+
+$("#closeDialog")?.addEventListener("click", () => {
+
+  $("#productDialog").close();
+
+});
+
+ 
+
+$("#productDialog")?.addEventListener("close", () => {
+
+  document.body.classList.remove("modal-open");
+
+});
+
+ 
+
+$("#productDialog")?.addEventListener("click", (event) => {
+
+  if (event.target === $("#productDialog")) $("#productDialog").close();
+
+});
+
+ 
+
+if ($("#year")) $("#year").textContent = new Date().getFullYear();
+
+ 
+
+init();
