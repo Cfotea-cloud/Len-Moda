@@ -14,9 +14,9 @@ const FALLBACK = {
 
   INSTAGRAM: "lenmoda",
 
-  INSTAGRAM_URL: https://www.instagram.com/,
+  INSTAGRAM_URL: "https://www.instagram.com/",
 
-  FACEBOOK_URL: https://www.facebook.com/,
+  FACEBOOK_URL: "https://www.facebook.com/",
 
   HERO_URL: ""
 
@@ -1393,3 +1393,31 @@ if ($("#year")) {
  
 
 init();
+
+.header-socials {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin-left: 20px;
+
+}
+
+.header-socials a {
+
+  text-decoration: none;
+
+  font-size: 22px;
+
+  transition: 0.25s;
+
+}
+
+.header-socials a:hover {
+
+  transform: translateY(-2px);
+
+}
