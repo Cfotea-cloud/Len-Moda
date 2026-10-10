@@ -4,7 +4,7 @@ const SHEET_ID = "1ZmqzWKuMgQnqzEG3DTyBjHRePkxTy8mhc_d0_pOuitc";
 
 const csvUrl = (sheet) =>
 
-`https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
+  `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheet)}`;
 
  
 
@@ -14,9 +14,9 @@ const FALLBACK = {
 
   INSTAGRAM: "lenmoda",
 
-  INSTAGRAM_URL: "https://www.instagram.com/",
+  INSTAGRAM_URL: https://www.instagram.com/,
 
-  FACEBOOK_URL: "https://www.facebook.com/",
+  FACEBOOK_URL: https://www.facebook.com/,
 
   HERO_URL: ""
 
@@ -35,6 +35,8 @@ let active = "TODOS";
 let selectedProduct = null;
 
 let selectedVariant = null;
+
+let selectedSize = null;
 
 let currentPhoto = 0;
 
@@ -140,7 +142,11 @@ function parseCSV(text) {
 
   return rows.slice(1).map((values) =>
 
-    Object.fromEntries(headers.map((header, index) => [header, norm(values[index])]))
+    Object.fromEntries(
+
+      headers.map((header, index) => [header, norm(values[index])])
+
+    )
 
   );
 
@@ -152,7 +158,11 @@ async function loadSheet(sheet) {
 
   const response = await fetch(csvUrl(sheet), { cache: "no-store" });
 
-  if (!response.ok) throw new Error(`No se pudo cargar la hoja ${sheet}: ${response.status}`);
+  if (!response.ok) {
+
+    throw new Error(`No se pudo cargar la hoja ${sheet}: ${response.status}`);
+
+  }
 
   return parseCSV(await response.text());
 
@@ -182,7 +192,11 @@ function imageUrl(url) {
 
   const id = driveFileId(value);
 
-  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600` : value;
+  return id
+
+    ? `https://drive.google.com/thumbnail?id=${id}&sz=w1600`
+
+    : value;
 
 }
 
@@ -232,7 +246,13 @@ function safeImage(url) {
 
 function money(value) {
 
-  const number = Number(String(value).replace(/[^0-9,.-]/g, "").replace(",", "."));
+  const number = Number(
+
+    String(value).replace(/[^0-9,.-]/g, "").replace(",", ".")
+
+  );
+
+ 
 
   return Number.isFinite(number)
 
@@ -286,7 +306,11 @@ function mainPhotos(product) {
 
  
 
-function whatsappUrl(message = "Hola! Quisiera consultar por los productos de LEN MODA.") {
+function whatsappUrl(
+
+  message = "Hola! Quisiera consultar por los productos de LEN MODA."
+
+) {
 
   return `https://wa.me/${getConfig("WHATSAPP")}?text=${encodeURIComponent(message)}`;
 
@@ -300,7 +324,21 @@ function createCard(product) {
 
   const photos = mainPhotos(product);
 
-  const node = $("#productTemplate").content.cloneNode(true);
+  const template = $("#productTemplate");
+
+ 
+
+  if (!template) {
+
+    console.error('Falta <template id="productTemplate"> en index.html');
+
+    return document.createDocumentFragment();
+
+  }
+
+ 
+
+  const node = template.content.cloneNode(true);
 
   const article = node.querySelector(".product-card");
 
@@ -330,6 +368,8 @@ function createCard(product) {
 
   };
 
+ 
+
   secondaryImage.onerror = () => {
 
     secondaryImage.onerror = null;
@@ -350,7 +390,11 @@ function createCard(product) {
 
   const prices = availableVariants
 
-    .map((variant) => Number(String(variant.PRECIO).replace(/[^0-9.-]/g, "")))
+    .map((variant) =>
+
+      Number(String(variant.PRECIO).replace(/[^0-9.-]/g, ""))
+
+    )
 
     .filter(Number.isFinite);
 
@@ -368,13 +412,25 @@ function createCard(product) {
 
   if (yes(product.NUEVO)) {
 
-    badges.insertAdjacentHTML("beforeend", '<span class="badge">NUEVO</span>');
+    badges.insertAdjacentHTML(
+
+      "beforeend",
+
+      '<span class="badge">NUEVO</span>'
+
+    );
 
   }
 
   if (yes(product.DESTACADO)) {
 
-    badges.insertAdjacentHTML("beforeend", '<span class="badge">FAVORITO</span>');
+    badges.insertAdjacentHTML(
+
+      "beforeend",
+
+      '<span class="badge">FAVORITO</span>'
+
+    );
 
   }
 
@@ -422,15 +478,19 @@ function renderInto(container, list) {
 
 function filteredProducts() {
 
-  const searchInput = $("#search");
-
-  const query = key(searchInput?.value || "");
+  const query = key($("#search")?.value || "");
 
  
 
   return products
 
-    .filter((product) => yes(product.VISIBLE) && productVariants(product.ID_PRODUCTO).length)
+    .filter(
+
+      (product) =>
+
+        yes(product.VISIBLE) && productVariants(product.ID_PRODUCTO).length
+
+    )
 
     .filter((product) => {
 
@@ -446,9 +506,15 @@ function filteredProducts() {
 
       const searchable = key(
 
-        `${product.NOMBRE} ${product.GENERO} ${product.CATEGORIA} ${product.DESCRIPCION} ` +
+        `${product.NOMBRE} ${product.GENERO} ${product.CATEGORIA} ` +
 
-        productVariants(product.ID_PRODUCTO).map((variant) => variant.COLOR).join(" ")
+          `${product.DESCRIPCION} ` +
+
+          productVariants(product.ID_PRODUCTO)
+
+            .map((variant) => variant.COLOR)
+
+            .join(" ")
 
       );
 
@@ -466,13 +532,21 @@ function renderCatalog() {
 
   const list = filteredProducts();
 
+ 
+
   if ($("#count")) {
 
-    $("#count").textContent = `${list.length} producto${list.length === 1 ? "" : "s"}`;
+    $("#count").textContent =
+
+      `${list.length} producto${list.length === 1 ? "" : "s"}`;
 
   }
 
+ 
+
   renderInto($("#grid"), list);
+
+ 
 
   if ($("#status")) {
 
@@ -508,7 +582,19 @@ function setupFilters() {
 
  
 
-  const values = ["TODOS", "MUJER", "HOMBRE", ...products.map((p) => key(p.CATEGORIA))];
+  const values = [
+
+    "TODOS",
+
+    "MUJER",
+
+    "HOMBRE",
+
+    ...products.map((product) => key(product.CATEGORIA))
+
+  ];
+
+ 
 
   container.innerHTML = "";
 
@@ -554,17 +640,23 @@ function iconSVG(category) {
 
   }
 
+ 
+
   if (categoryKey.includes("ACCES")) {
 
     return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 18h28l-2 24H12z"/><path d="M17 18c0-10 14-10 14 0"/></svg>';
 
   }
 
+ 
+
   if (categoryKey.includes("CALZ") || categoryKey.includes("ZAP")) {
 
     return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 31c9 0 13-6 15-16l7 5c1 7 6 9 12 11v7H8z"/></svg>';
 
   }
+
+ 
 
   return '<svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 7l7 4 7-4 10 10-6 7v18H13V24l-6-7z"/></svg>';
 
@@ -580,21 +672,35 @@ function setupCategories() {
 
  
 
-  const categories = [...new Set(
+  const categories = [
 
-    products.filter((p) => yes(p.VISIBLE)).map((p) => key(p.CATEGORIA)).filter(Boolean)
+    ...new Set(
 
-  )].slice(0, 5);
+      products
+
+        .filter((product) => yes(product.VISIBLE))
+
+        .map((product) => key(product.CATEGORIA))
+
+        .filter(Boolean)
+
+    )
+
+  ].slice(0, 5);
 
  
 
   grid.innerHTML = "";
 
+ 
+
   categories.forEach((category) => {
 
     const count = products.filter(
 
-      (product) => key(product.CATEGORIA) === category && yes(product.VISIBLE)
+      (product) =>
+
+        key(product.CATEGORIA) === category && yes(product.VISIBLE)
 
     ).length;
 
@@ -612,6 +718,8 @@ function setupCategories() {
 
       <small>${count} producto${count === 1 ? "" : "s"}</small>`;
 
+ 
+
     button.onclick = () => {
 
       active = category;
@@ -623,6 +731,8 @@ function setupCategories() {
       $("#catalogo")?.scrollIntoView({ behavior: "smooth" });
 
     };
+
+ 
 
     grid.append(button);
 
@@ -638,11 +748,15 @@ function openProduct(product, variantId) {
 
   const availableVariants = productVariants(product.ID_PRODUCTO);
 
+ 
+
   selectedVariant =
 
-    availableVariants.find((variant) => variant.ID_VARIANTE === variantId) ||
+    availableVariants.find(
 
-    availableVariants[0];
+      (variant) => variant.ID_VARIANTE === variantId
+
+    ) || availableVariants[0];
 
  
 
@@ -652,7 +766,9 @@ function openProduct(product, variantId) {
 
   currentPhoto = 0;
 
-  $("#detailCategory").textContent = `${product.GENERO} · ${product.CATEGORIA}`;
+  $("#detailCategory").textContent =
+
+    `${product.GENERO} · ${product.CATEGORIA}`;
 
   $("#detailName").textContent = product.NOMBRE;
 
@@ -670,13 +786,19 @@ function openProduct(product, variantId) {
 
   colors.innerHTML = "";
 
+ 
+
   availableVariants.forEach((variant) => {
 
     const button = document.createElement("button");
 
     button.className =
 
-      `option ${variant.ID_VARIANTE === selectedVariant.ID_VARIANTE ? "active" : ""}`;
+      `option ${
+
+        variant.ID_VARIANTE === selectedVariant.ID_VARIANTE ? "active" : ""
+
+      }`;
 
     button.textContent = variant.COLOR;
 
@@ -698,6 +820,42 @@ function openProduct(product, variantId) {
 
  
 
+function updateProductWhatsApp() {
+
+  if (!selectedProduct || !selectedVariant || !$("#detailWa")) return;
+
+ 
+
+  const message =
+
+`Hola!
+
+ 
+
+Me interesa el siguiente producto:
+
+ 
+
+Producto: ${selectedProduct.NOMBRE}
+
+Código: ${selectedProduct.ID_PRODUCTO}
+
+Color: ${selectedVariant.COLOR}
+
+Talle: ${selectedSize || "No especificado"}
+
+ 
+
+¿Sigue disponible?`;
+
+ 
+
+  $("#detailWa").href = whatsappUrl(message);
+
+}
+
+ 
+
 function renderVariant() {
 
   const photos = variantPhotos(selectedVariant);
@@ -708,56 +866,71 @@ function renderVariant() {
 
   $("#detailPrice").textContent = money(selectedVariant.PRECIO);
 
-const sizes = norm(selectedVariant.TALLES)
+ 
 
-  .split("|")
+  const sizes = norm(selectedVariant.TALLES)
 
-  .filter(Boolean);
+    .split("|")
 
-window.selectedSize = sizes[0] || null;
+    .map((size) => size.trim())
 
-$("#sizes").innerHTML = sizes
+    .filter(Boolean);
 
-  .map(
+ 
 
-    (size) =>
+  selectedSize = sizes[0] || null;
 
-      `<button class="option size-option ${
+  const sizesContainer = $("#sizes");
 
-        size === window.selectedSize ? "active" : ""
+  sizesContainer.innerHTML = "";
 
-      }" data-size="${size}">
+ 
 
-        ${size.trim()}
+  sizes.forEach((size) => {
 
-      </button>`
+    const button = document.createElement("button");
 
-  )
+    button.type = "button";
 
-  .join("");
+    button.className =
 
-document.querySelectorAll(".size-option").forEach((btn) => {
+      `option size-option ${size === selectedSize ? "active" : ""}`;
 
-  btn.addEventListener("click", () => {
+    button.dataset.size = size;
 
-    document
+    button.textContent = size;
 
-      .querySelectorAll(".size-option")
+ 
 
-      .forEach((b) => b.classList.remove("active"));
+    button.addEventListener("click", () => {
 
-    btn.classList.add("active");
+      $$(".size-option").forEach((item) =>
 
-    window.selectedSize = btn.dataset.size;
+        item.classList.remove("active")
+
+      );
+
+      button.classList.add("active");
+
+      selectedSize = button.dataset.size;
+
+      updateProductWhatsApp();
+
+    });
+
+ 
+
+    sizesContainer.append(button);
 
   });
 
-});
  
 
   const thumbs = $("#thumbs");
 
   thumbs.innerHTML = "";
+
+ 
 
   photos.forEach((url, index) => {
 
@@ -765,7 +938,9 @@ document.querySelectorAll(".size-option").forEach((btn) => {
 
     img.src = safeImage(url);
 
-    img.alt = `${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${index + 1}`;
+    img.alt =
+
+      `${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${index + 1}`;
 
     img.className = index === 0 ? "active" : "";
 
@@ -785,20 +960,7 @@ document.querySelectorAll(".size-option").forEach((btn) => {
 
  
 
-const message =
-
-`Hola!
-
-Me interesa el siguiente producto:
-
-Producto: ${selectedProduct.NOMBRE}
-Código: ${selectedProduct.ID_PRODUCTO}
-Color: ${selectedVariant.COLOR}
-Talle: ${window.selectedSize || "No especificado"}
-
-¿Sigue disponible?`;
-
-  $("#detailWa").href = whatsappUrl(message);
+  updateProductWhatsApp();
 
 }
 
@@ -807,6 +969,8 @@ Talle: ${window.selectedSize || "No especificado"}
 function setPhoto(index, photos = variantPhotos(selectedVariant)) {
 
   const mainPhoto = $("#mainPhoto");
+
+ 
 
   if (!photos.length) {
 
@@ -825,6 +989,8 @@ function setPhoto(index, photos = variantPhotos(selectedVariant)) {
   mainPhoto.alt =
 
     `${selectedProduct.NOMBRE}, ${selectedVariant.COLOR}, vista ${currentPhoto + 1}`;
+
+ 
 
   mainPhoto.onerror = () => {
 
@@ -850,33 +1016,66 @@ function setupInstagram() {
 
   const handle = getConfig("INSTAGRAM") || "lenmoda";
 
-  const url =
+  const instagramUrl =
 
     getConfig("INSTAGRAM_URL") ||
 
     `https://www.instagram.com/${handle.replace("@", "")}/`;
 
+  const facebookUrl = getConfig("FACEBOOK_URL") || FALLBACK.FACEBOOK_URL;
+
  
 
   if ($("#instagramLink")) {
-    $("#instagramLink").href = url;
+
+    $("#instagramLink").href = instagramUrl;
+
     $("#instagramLink").textContent =
-     `@${handle.replace("@", "")} →`;
-  }
 
-if ($("#headerInstagram"))
-    $("#headerInstagram").href = url;
-
-if ($("#headerFacebook"))
-    $("#headerFacebook").href = getConfig("FACEBOOK_URL");
-
+      `@${handle.replace("@", "")} →`;
 
   }
 
-  if ($("#footerInstagram")) $("#footerInstagram").href = url;
-  const grid = $("#instagramGrid");
-  if (!grid) return;
  
+
+  if ($("#headerInstagram")) {
+
+    $("#headerInstagram").href = instagramUrl;
+
+  }
+
+ 
+
+  if ($("#headerFacebook")) {
+
+    $("#headerFacebook").href = facebookUrl;
+
+  }
+
+ 
+
+  if ($("#footerInstagram")) {
+
+    $("#footerInstagram").href = instagramUrl;
+
+  }
+
+ 
+
+  if ($("#footerFacebook")) {
+
+    $("#footerFacebook").href = facebookUrl;
+
+  }
+
+ 
+
+  const grid = $("#instagramGrid");
+
+  if (!grid) return;
+
+ 
+
   const images = products
 
     .filter((product) => yes(product.VISIBLE))
@@ -889,11 +1088,13 @@ if ($("#headerFacebook"))
 
   grid.innerHTML = "";
 
+ 
+
   images.forEach((src, index) => {
 
     const link = document.createElement("a");
 
-    link.href = url;
+    link.href = instagramUrl;
 
     link.target = "_blank";
 
@@ -903,7 +1104,9 @@ if ($("#headerFacebook"))
 
     link.innerHTML =
 
-      `<img src="${safeImage(src)}" alt="Inspiración LEN MODA ${index + 1}" loading="lazy">`;
+      `<img src="${safeImage(src)}" ` +
+
+      `alt="Inspiración LEN MODA ${index + 1}" loading="lazy">`;
 
     grid.append(link);
 
@@ -917,21 +1120,19 @@ function setupConfig() {
 
   const wa = whatsappUrl();
 
-  ["#headerWa", "#heroWa", "#floatingWa", "#footerWa"].forEach((selector) => {
-
-    const element = $(selector);
-
-    if (element) element.href = wa;
-
-  });
-
  
 
-  if ($("#footerFacebook")) {
+  ["#headerWa", "#heroWa", "#floatingWa", "#footerWa"].forEach(
 
-    $("#footerFacebook").href = getConfig("FACEBOOK_URL") || "#";
+    (selector) => {
 
-  }
+      const element = $(selector);
+
+      if (element) element.href = wa;
+
+    }
+
+  );
 
  
 
@@ -1089,9 +1290,11 @@ $("#menuButton")?.addEventListener("click", () => {
 
   const nav = $("#mainNav");
 
+  if (!nav) return;
+
   const open = nav.classList.toggle("open");
 
-  $("#menuButton").setAttribute("aria-expanded", open);
+  $("#menuButton").setAttribute("aria-expanded", String(open));
 
 });
 
@@ -1117,9 +1320,15 @@ $$('[data-carousel]').forEach((button) => {
 
         : $("#newCarousel");
 
+ 
+
     target?.scrollBy({
 
-      left: Number(button.dataset.dir) * Math.min(target.clientWidth * 0.85, 900),
+      left:
+
+        Number(button.dataset.dir) *
+
+        Math.min(target.clientWidth * 0.85, 900),
 
       behavior: "smooth"
 
@@ -1131,15 +1340,25 @@ $$('[data-carousel]').forEach((button) => {
 
  
 
-$("#photoPrev")?.addEventListener("click", () => setPhoto(currentPhoto - 1));
+$("#photoPrev")?.addEventListener("click", () =>
 
-$("#photoNext")?.addEventListener("click", () => setPhoto(currentPhoto + 1));
+  setPhoto(currentPhoto - 1)
+
+);
+
+ 
+
+$("#photoNext")?.addEventListener("click", () =>
+
+  setPhoto(currentPhoto + 1)
+
+);
 
  
 
 $("#closeDialog")?.addEventListener("click", () => {
 
-  $("#productDialog").close();
+  $("#productDialog")?.close();
 
 });
 
@@ -1155,13 +1374,21 @@ $("#productDialog")?.addEventListener("close", () => {
 
 $("#productDialog")?.addEventListener("click", (event) => {
 
-  if (event.target === $("#productDialog")) $("#productDialog").close();
+  if (event.target === $("#productDialog")) {
+
+    $("#productDialog").close();
+
+  }
 
 });
 
  
 
-if ($("#year")) $("#year").textContent = new Date().getFullYear();
+if ($("#year")) {
+
+  $("#year").textContent = new Date().getFullYear();
+
+}
 
  
 
